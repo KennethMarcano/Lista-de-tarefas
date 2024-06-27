@@ -1,0 +1,17 @@
+.form {
+    input {
+        margin: 0 1.3vw;
+        padding: 0.56vw 0;
+        border: 1px solid #91d6e4;
+        width: 50vw;
+        font-size: 90%;
+    }
+
+    button {
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        background: #ade8f4;
+    }
+
+}
