@@ -71,7 +71,8 @@ export default class Main extends Component {
         const { novaTarefa, tarefas } = this.state;
         return (
             <div className='main'>
-                <h1>Lista de tarefas en el nuevo branch</h1>
+                <h1>Lista de tarefas solucionada</h1>
+                <p>uma nova linea</p>
                 <Form
                     handleSubmit={this.handleSubmit}
                     handleChange={this.handleChange}
