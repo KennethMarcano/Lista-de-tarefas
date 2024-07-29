@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,11 +7,38 @@ import { AiOutlineCalendar } from 'react-icons/ai';
 import { FaPlus } from 'react-icons/fa';
 import './Form.css'
 
-export default function Form({ handleSubmit, handleChange, novaTarefa }) {
+export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpenCalendar }) {
     const [startDate, setStartDate] = useState(null);
-    const [open, setOpen] = useState(false);
+
+    useEffect(()=> {
+        setDate()
+    }, [novaTarefa])
+
+    const setDate = () => {
+        if(novaTarefa[2] === ''){
+            setStartDate(new Date());
+            return;
+        }
+        const dates = novaTarefa[2].split('-');
+        dates.reverse();
+        if(dates[1].lenght < 2){
+            dates[1] = dates[1].padStart(2, '0')
+        }
+
+        if(dates[2].lenght < 2){
+            console.log(dates[2])
+            dates[2] = dates[2].toString().padStart(2, '0');
+        }
+        dates[2] = dates[2] + 'T12:00:00Z';
+        console.log(dates);
+        dates[0] = '20' + dates[0];
+        const novodate =  dates.join('-');
+        console.log(novodate);
+        setStartDate(new Date(novodate));
+    }
 
     const handleDateChange = (date) => {
+        console.log(date);
         setStartDate(date);
     };
 
@@ -22,18 +49,18 @@ export default function Form({ handleSubmit, handleChange, novaTarefa }) {
                 type='text'
                 value={novaTarefa[0] || ''}
             />
-            <button onClick={() => setOpen(!open)}>
+            <button type='button' onClick={handleOpenCalendar}>
                 <AiOutlineCalendar size={20} />
             </button>
 
-            {open && (
-                <DatePicker
-                    selected={startDate}
-                    onChange={handleDateChange}
-                    dateFormat={"dd-MM-yy"}
-                    className='calendar'
-                />
-            )}
+            <DatePicker
+                minDate={new Date()}
+                selected={startDate}
+                onSelect={handleDateChange}
+                onChange={handleDateChange}
+                dateFormat={"dd-MM-yy"}
+                className='calendar'
+            />
             <button type='submit'>
                 <FaPlus />
             </button>
@@ -52,4 +79,5 @@ Form.prototypes = {
     handleSubmit: PropTypes.func.isRequired,
     handleChange: PropTypes.func.isRequired,
     novaTarefa: PropTypes.array.isRequired,
+    handleOpenCalendar: PropTypes.array.isRequired,
 }

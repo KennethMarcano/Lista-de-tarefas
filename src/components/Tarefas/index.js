@@ -6,19 +6,21 @@ import './Tarefas.css'
 
 export default function Tarefas({ tarefas, handleEdit, handleDelete, handleCheck }) {
     return (
-        <ul className='tarefas'> 
-            {tarefas.map((tarefa, index) => (
+        <ul className='tarefas'>
+            {
+                tarefas.map((tarefa, index) => (
                     <li key={tarefa[0]} className="listTarefas">
                         <label id="tarefas">{tarefa[0]}</label>
                         <div className="buttons">
+                            <label id="taskDate">{tarefa[2]}</label>
                             <FaEdit onClick={(e) => handleEdit(e, index)} className='edit button' />
                             <FaWindowClose onClick={(e) => handleDelete(e, index)} className='delete button' />
-                            <FaCheckSquare onClick={(e) => handleCheck(index) } className="check button"/>
+                            <FaCheckSquare onClick={(e) => handleCheck(index)} className="check button" />
                         </div>
 
                     </li>
-
-            ))}
+                    ))
+            }
         </ul>
     )
 }

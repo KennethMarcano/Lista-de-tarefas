@@ -6,27 +6,28 @@ import Tarefas from './Tarefas';
 import './Main.css'
 export default class Main extends Component {
     state = {
-        novaTarefa: ['', 0],
+        novaTarefa: ['', 0, ''],
         tarefas: [],
         index: -1,
+        open: true,
     };
 
     componentDidMount() {
         const tarefas = JSON.parse(localStorage.getItem('tarefas'));
-        if(tarefas === null) return;
+        if (tarefas === null) return;
         this.setState({ tarefas });
-      }
-    
-      componentDidUpdate(prevProps, prevState) {
+    }
+
+    componentDidUpdate(prevProps, prevState) {
         const { tarefas } = this.state;
         if (tarefas === prevState.tarefas) return;
         localStorage.setItem('tarefas', JSON.stringify(tarefas));
         this.addCheck(tarefas);
-      }
+    }
 
     handleChange = (e) => {
         this.setState({
-            novaTarefa: [e.target.value, false],
+            novaTarefa: [e.target.value, false, this.state.novaTarefa[2]],
         })
     }
 
@@ -34,14 +35,18 @@ export default class Main extends Component {
         e.preventDefault();
         const { tarefas, index } = this.state;
         let novaTarefa = this.state.novaTarefa;
+        const date = document.getElementsByClassName('calendar')
         novaTarefa[0] = novaTarefa[0].trim();
         if (tarefas.indexOf(novaTarefa[0]) !== -1 || !novaTarefa[0]) return;
+        if (!this.state.open && date[0].value !== '') {
+            novaTarefa[2] = date[0].value;
+        }
         const novasTarefas = [...tarefas];
         if (index !== -1 && novaTarefa[0]) {
             novasTarefas[index] = novaTarefa;
         } else novasTarefas.push(novaTarefa);
         this.setState({
-            novaTarefa: ['', 0],
+            novaTarefa: ['', 0, ''],
             tarefas: [...novasTarefas],
             index: -1,
         })
@@ -59,6 +64,14 @@ export default class Main extends Component {
     handleEdit = (e, index) => {
         const { tarefas } = this.state;
         const novasTarefas = [...tarefas]
+        const calendar = document.getElementsByClassName('calendar');
+        if(novasTarefas[index][2] !== '') {
+                calendar[0].style.display = 'block';
+                this.setState({open: false});
+        }
+        else{
+            calendar[0].style.display = 'none';
+            this.setState({open: true});}
         this.setState({
             novaTarefa: novasTarefas[index],
             index,
@@ -77,13 +90,22 @@ export default class Main extends Component {
     addCheck = (tarefas) => {
         const listTarefas = document.querySelectorAll('label#tarefas');
         const totalTarefas = listTarefas.length;
-        for (let i = 0; i < totalTarefas; i++){
-            if(tarefas[i][1]) {
+        for (let i = 0; i < totalTarefas; i++) {
+            if (tarefas[i][1]) {
                 listTarefas[i].classList.add('tarefa-check')
                 continue;
             }
             listTarefas[i].classList.remove('tarefa-check')
         }
+    }
+
+    handleOpenCalendar = () => {
+        const calendar = document.getElementsByClassName('calendar');
+        if (this.state.open) calendar[0].style.display = 'block';
+        else calendar[0].style.display = 'none';
+        this.setState({
+            open: !this.state.open,
+        })
     }
 
     render() {
@@ -96,6 +118,7 @@ export default class Main extends Component {
                     handleChange={this.handleChange}
                     novaTarefa={novaTarefa}
                     getDate={this.getDate}
+                    handleOpenCalendar={this.handleOpenCalendar}
                 />
                 <Tarefas
                     tarefas={tarefas}

@@ -17,6 +17,7 @@
     }
 
     .calendar{
+        display: none;
         max-width: 11rem;
         text-align: center;
     }
