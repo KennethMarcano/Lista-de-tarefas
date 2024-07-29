@@ -5,9 +5,14 @@
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
+html{
+  font-size: 10px;
+}
+
 body {
   background: #caf0f8;
   display: flex;
   justify-content: center;
+  font-size: 1.6rem;
 }
 

@@ -1,37 +1,41 @@
 .tarefas {
-    margin: 1vw 0;
-    
+    display: flex;
+    flex-direction: column;
+    max-width: 60vw;
+    text-align: justify;
+    font-size: 90%;
+    padding-top: 1rem;
     .listTarefas{
         display: flex;
-        transition: all 300ms;
-        text-align: right;
-        margin: 0 8.5vw 0 7.5vw;
-        text-align: left;
-        align-items: center;
         justify-content: space-between;
-    }
-
-    li {
+        align-items: center;
         list-style-type: none;
-        margin: 1.5vw 0;
-        width: 80%;
-
+        padding: 1vh 0;
+        transition: all 300ms;
     }
 
     .listTarefas:hover {
         background: rgb(220, 238, 240);
     }
-    
 
-    .edit {
-        margin: 0 1vw;
-        color: blueviolet;
+    label{
+        max-width: 70%;
+    }
+
+    .button{
+        margin-left: 0.5rem;
         cursor: pointer;
+    }
+    .edit {
+        color: blueviolet;
     }
 
     .delete {
         color:crimson;
-        cursor: pointer;
+    }
+
+    .check{
+        color: goldenrod;
     }
 
 }

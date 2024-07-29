@@ -6,7 +6,7 @@ import Tarefas from './Tarefas';
 import './Main.css'
 export default class Main extends Component {
     state = {
-        novaTarefa: '',
+        novaTarefa: ['', 0],
         tarefas: [],
         index: -1,
     };
@@ -19,31 +19,30 @@ export default class Main extends Component {
     
       componentDidUpdate(prevProps, prevState) {
         const { tarefas } = this.state;
-    
         if (tarefas === prevState.tarefas) return;
-    
         localStorage.setItem('tarefas', JSON.stringify(tarefas));
+        this.addCheck(tarefas);
       }
 
     handleChange = (e) => {
         this.setState({
-            novaTarefa: e.target.value,
+            novaTarefa: [e.target.value, false],
         })
     }
 
     handleSubmit = (e) => {
         e.preventDefault();
         const { tarefas, index } = this.state;
-        let { novaTarefa } = this.state;
-        novaTarefa = novaTarefa.trim(); //esto es para quitar los espacios sobrantes al comienzo y al final
-        if (tarefas.indexOf(novaTarefa) !== -1 || !novaTarefa) return; //se comprueba que no exista dicha tarea
-        const novasTarefas = [...tarefas]; //para no modificar el valor del estado, estas solo se modifican por el serState
-        if (index !== -1 && novaTarefa) { //se verifica atraves de la bandera index si se esta editando o creando una tarea nueva
+        let novaTarefa = this.state.novaTarefa;
+        novaTarefa[0] = novaTarefa[0].trim();
+        if (tarefas.indexOf(novaTarefa[0]) !== -1 || !novaTarefa[0]) return;
+        const novasTarefas = [...tarefas];
+        if (index !== -1 && novaTarefa[0]) {
             novasTarefas[index] = novaTarefa;
         } else novasTarefas.push(novaTarefa);
         this.setState({
+            novaTarefa: ['', 0],
             tarefas: [...novasTarefas],
-            novaTarefa: '',
             index: -1,
         })
     }
@@ -66,6 +65,26 @@ export default class Main extends Component {
         })
     }
 
+    handleCheck = (index) => {
+        const { tarefas } = this.state;
+        let novasTarefas = [...tarefas];
+        novasTarefas[index][1] = !novasTarefas[index][1];
+        this.setState({
+            tarefas: [...novasTarefas],
+        })
+    }
+
+    addCheck = (tarefas) => {
+        const listTarefas = document.querySelectorAll('label#tarefas');
+        const totalTarefas = listTarefas.length;
+        for (let i = 0; i < totalTarefas; i++){
+            if(tarefas[i][1]) {
+                listTarefas[i].classList.add('tarefa-check')
+                continue;
+            }
+            listTarefas[i].classList.remove('tarefa-check')
+        }
+    }
 
     render() {
         const { novaTarefa, tarefas } = this.state;
@@ -76,12 +95,14 @@ export default class Main extends Component {
                     handleSubmit={this.handleSubmit}
                     handleChange={this.handleChange}
                     novaTarefa={novaTarefa}
+                    getDate={this.getDate}
                 />
-
                 <Tarefas
                     tarefas={tarefas}
                     handleEdit={this.handleEdit}
                     handleDelete={this.handleDelete}
+                    handleCheck={this.handleCheck}
+                    addCheck={this.addCheck}
                 />
             </div>
         )

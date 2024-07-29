@@ -1,17 +1,23 @@
 .form {
+    display: flex;
+    justify-content: center;
+    width: 60vw;
     input {
-        margin: 0 1.3vw;
-        padding: 0.56vw 0;
-        border: 1px solid #91d6e4;
-        width: 50vw;
+        width: 100%;
+        padding: 0.35rem 0;
+        border: 0.1rem solid #91d6e4;
         font-size: 90%;
     }
 
     button {
         border: none;
         cursor: pointer;
-        border-radius: 4px;
-        background: #ade8f4;
+        padding-left: 1rem;
+        background: none;
     }
 
+    .calendar{
+        max-width: 11rem;
+        text-align: center;
+    }
 }
