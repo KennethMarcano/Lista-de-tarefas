@@ -10,30 +10,28 @@ import './Form.css'
 export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpenCalendar }) {
     const [startDate, setStartDate] = useState(null);
 
-    useEffect(()=> {
+    useEffect(() => {
         setDate()
     }, [novaTarefa])
 
     const setDate = () => {
-        if(novaTarefa[2] === ''){
+        if (novaTarefa[2] === '') {
             setStartDate(new Date());
             return;
         }
         const dates = novaTarefa[2].split('-');
         dates.reverse();
-        if(dates[1].lenght < 2){
+        if (dates[1].lenght < 2) {
             dates[1] = dates[1].padStart(2, '0')
         }
 
-        if(dates[2].lenght < 2){
+        if (dates[2].lenght < 2) {
             console.log(dates[2])
             dates[2] = dates[2].toString().padStart(2, '0');
         }
         dates[2] = dates[2] + 'T12:00:00Z';
-        console.log(dates);
         dates[0] = '20' + dates[0];
-        const novodate =  dates.join('-');
-        console.log(novodate);
+        const novodate = dates.join('-');
         setStartDate(new Date(novodate));
     }
 
@@ -49,21 +47,24 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
                 type='text'
                 value={novaTarefa[0] || ''}
             />
-            <button type='button' onClick={handleOpenCalendar}>
-                <AiOutlineCalendar size={20} />
-            </button>
 
-            <DatePicker
-                minDate={new Date()}
-                selected={startDate}
-                onSelect={handleDateChange}
-                onChange={handleDateChange}
-                dateFormat={"dd-MM-yy"}
-                className='calendar'
-            />
-            <button type='submit'>
-                <FaPlus />
-            </button>
+            <div>
+                <button type='button' onClick={handleOpenCalendar}>
+                    <AiOutlineCalendar size={20} />
+                </button>
+
+                <DatePicker
+                    minDate={new Date()}
+                    selected={startDate}
+                    onSelect={handleDateChange}
+                    onChange={handleDateChange}
+                    dateFormat={"dd-MM-yy"}
+                    className='calendar'
+                />
+                <button type='submit'>
+                    <FaPlus />
+                </button>
+            </div>
         </form>
     )
 }
