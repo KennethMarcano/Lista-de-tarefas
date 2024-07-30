@@ -1,9 +1,9 @@
 .tarefas {
     display: flex;
     flex-direction: column;
-    max-width: 80vw;
+    width: 60vw;
     text-align: justify;
-    font-size: 90%;
+    font-size: 1.4rem;
     padding-top: 1rem;
     .listTarefas{
         display: flex;
@@ -15,6 +15,10 @@
         transition: all 300ms;
     }
 
+    #taskDate{
+        width: 6.4rem;
+        margin-left: 2rem;
+    }
     .date-buttons{
         display: flex;
     }
@@ -22,8 +26,8 @@
         background: rgb(220, 238, 240);
     }
 
-    #tarefas{
-        max-width: 80%;
+    .buttons{
+        width: 6rem;
     }
 
     .button{
@@ -43,21 +47,21 @@
     }
 
     @media (max-width: 850px) {
-
         .date-buttons{
-            display: block;
+            flex-direction: column;
+            padding-left: 1rem;
         }
+        #taskDate{
+            margin-left: 0;
+        }
+
     }
 
     @media (max-width: 550px) {
         .listTarefas{
             flex-direction: column;
-            align-items: start;
+            align-items: center;
             gap: 1rem;
-        }
-
-        #tarefas{
-            max-width: 100%;
         }
 
         .date-buttons{
