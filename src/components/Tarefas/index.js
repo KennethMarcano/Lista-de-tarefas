@@ -9,7 +9,7 @@ export default function Tarefas({ tarefas, handleEdit, handleDelete, handleCheck
         <ul className='tarefas'>
             {
                 tarefas.map((tarefa, index) => (
-                    <li key={tarefa[0]} className="listTarefas">
+                    <li key={index} className="listTarefas">
                         <label id="tarefas">{tarefa[0]}</label>
                         <div className="date-buttons">
                             <label id="taskDate">{tarefa[2]}</label>

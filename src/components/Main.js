@@ -37,14 +37,14 @@ export default class Main extends Component {
         let novaTarefa = this.state.novaTarefa;
         const date = document.getElementsByClassName('calendar')
         novaTarefa[0] = novaTarefa[0].trim();
-        if (tarefas.indexOf(novaTarefa[0]) !== -1 || !novaTarefa[0]) return;
+        if (!novaTarefa[0]) return;
         if (!this.state.open && date[0].value !== '') {
-            novaTarefa[2] = date[0].value;
+            novaTarefa[2] = date[0].value; 
         }
         const novasTarefas = [...tarefas];
         if (index !== -1 && novaTarefa[0]) {
             novasTarefas[index] = novaTarefa;
-        } else novasTarefas.push(novaTarefa);
+        } else novasTarefas.unshift(novaTarefa);
         this.setState({
             novaTarefa: ['', 0, ''],
             tarefas: [...novasTarefas],
