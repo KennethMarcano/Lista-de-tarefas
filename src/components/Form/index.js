@@ -3,18 +3,14 @@ import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { AiOutlineCalendar } from 'react-icons/ai';
-
 import { FaPlus } from 'react-icons/fa';
+
 import './Form.css'
 
 export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpenCalendar }) {
     const [startDate, setStartDate] = useState(null);
 
     useEffect(() => {
-        setDate()
-    }, [novaTarefa])
-
-    const setDate = () => {
         if (novaTarefa[2] === '') {
             setStartDate(new Date());
             return;
@@ -33,7 +29,7 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
         dates[0] = '20' + dates[0];
         const novodate = dates.join('-');
         setStartDate(new Date(novodate));
-    }
+    }, [novaTarefa])
 
     const handleDateChange = (date) => {
         console.log(date);
@@ -48,23 +44,21 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
                 value={novaTarefa[0] || ''}
             />
 
-            <div>
-                <button type='button' onClick={handleOpenCalendar}>
-                    <AiOutlineCalendar size={20} />
-                </button>
+            <button className='calendar-icon' type='button' onClick={handleOpenCalendar}>
+                <AiOutlineCalendar size={15} />
+            </button>
 
-                <DatePicker
-                    minDate={new Date()}
-                    selected={startDate}
-                    onSelect={handleDateChange}
-                    onChange={handleDateChange}
-                    dateFormat={"dd-MM-yy"}
-                    className='calendar'
-                />
-                <button type='submit'>
-                    <FaPlus />
-                </button>
-            </div>
+            <DatePicker
+                minDate={new Date()}
+                selected={startDate}
+                onSelect={handleDateChange}
+                onChange={handleDateChange}
+                dateFormat={"dd-MM-yy"}
+                className='calendar'
+            />
+            <button type='submit'>
+                <FaPlus size={15}/>
+            </button>
         </form>
     )
 }
