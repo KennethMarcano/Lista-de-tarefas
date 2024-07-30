@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 
 import Form from './Form/index'
 import Tarefas from './Tarefas';
-
 import './Main.css'
+
 export default class Main extends Component {
     state = {
         novaTarefa: ['', 0, ''],

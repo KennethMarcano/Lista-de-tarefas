@@ -22,7 +22,6 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
         }
 
         if (dates[2].lenght < 2) {
-            console.log(dates[2])
             dates[2] = dates[2].toString().padStart(2, '0');
         }
         dates[2] = dates[2] + 'T12:00:00Z';
@@ -32,7 +31,6 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
     }, [novaTarefa])
 
     const handleDateChange = (date) => {
-        console.log(date);
         setStartDate(date);
     };
 
