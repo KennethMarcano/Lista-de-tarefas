@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { toast } from 'react-toastify';
 
+import formatDate from '../services/formatDate';
 import Form from './Form/index'
 import Tarefas from './Tarefas';
 import './Main.css'
@@ -10,12 +12,30 @@ export default class Main extends Component {
         tarefas: [],
         index: -1,
         open: true,
+        currentDate: new Date()
     };
 
     componentDidMount() {
         const tarefas = JSON.parse(localStorage.getItem('tarefas'));
         if (tarefas === null) return;
+        this.state.currentDate.setHours(0, 0, 0, 0);
         this.setState({ tarefas });
+    }
+
+    getDiffTime = (tasks, currentDate) => {
+        const overdueTaks = tasks.filter((task) => {
+            if (task[2] === '') return false;
+            const dateTask = new Date(formatDate(task[2]));
+            return dateTask.getTime() < currentDate.getTime()
+        })
+
+        const todayTasks = tasks.filter((task) => {
+            if (task[2] === '') return false;
+            const dateTask = new Date(formatDate(task[2]));
+            return dateTask.getTime() === currentDate.getTime()
+        })
+
+        return [overdueTaks, todayTasks]
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -31,15 +51,35 @@ export default class Main extends Component {
         })
     }
 
+    showMessage = (tasks, titleMessage) => {
+        if (tasks.length > 0) {
+            toast.warn(
+                <div>
+                    {titleMessage}:
+                    {
+                        tasks.map((task) => {
+                            return <p key={task[0]}>
+                                    - {task[0]}.
+                                   </p>
+                        })
+                    }
+                </div>
+            );
+        }
+    }
+
     handleSubmit = (e) => {
         e.preventDefault();
         const { tarefas, index } = this.state;
         let novaTarefa = this.state.novaTarefa;
-        const date = document.getElementsByClassName('calendar')
+        const date = document.getElementsByClassName('calendar');
+        const priorityTasks = this.getDiffTime(tarefas, this.state.currentDate);
+        this.showMessage(priorityTasks[0], 'Tarefas vencidas');
+        this.showMessage(priorityTasks[1], 'Tarefas com limite até hoje');
         novaTarefa[0] = novaTarefa[0].trim();
         if (!novaTarefa[0]) return;
         if (!this.state.open && date[0].value !== '') {
-            novaTarefa[2] = date[0].value; 
+            novaTarefa[2] = date[0].value;
         }
         const novasTarefas = [...tarefas];
         if (index !== -1 && novaTarefa[0]) {
@@ -65,13 +105,14 @@ export default class Main extends Component {
         const { tarefas } = this.state;
         const novasTarefas = [...tarefas]
         const calendar = document.getElementsByClassName('calendar');
-        if(novasTarefas[index][2] !== '') {
-                calendar[0].style.display = 'block';
-                this.setState({open: false});
+        if (novasTarefas[index][2] !== '') {
+            calendar[0].style.display = 'block';
+            this.setState({ open: false });
         }
-        else{
+        else {
             calendar[0].style.display = 'none';
-            this.setState({open: true});}
+            this.setState({ open: true });
+        }
         this.setState({
             novaTarefa: novasTarefas[index],
             index,

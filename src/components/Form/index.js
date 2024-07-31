@@ -6,6 +6,7 @@ import { AiOutlineCalendar } from 'react-icons/ai';
 import { FaPlus } from 'react-icons/fa';
 
 import './Form.css'
+import formatDate from '../../services/formatDate';
 
 export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpenCalendar }) {
     const [startDate, setStartDate] = useState(null);
@@ -15,18 +16,7 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
             setStartDate(new Date());
             return;
         }
-        const dates = novaTarefa[2].split('-');
-        dates.reverse();
-        if (dates[1].lenght < 2) {
-            dates[1] = dates[1].padStart(2, '0')
-        }
-
-        if (dates[2].lenght < 2) {
-            dates[2] = dates[2].toString().padStart(2, '0');
-        }
-        dates[2] = dates[2] + 'T12:00:00Z';
-        dates[0] = '20' + dates[0];
-        const novodate = dates.join('-');
+        const novodate = formatDate(novaTarefa[2]);
         setStartDate(new Date(novodate));
     }, [novaTarefa])
 
