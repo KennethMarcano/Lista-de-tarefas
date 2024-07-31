@@ -16,6 +16,12 @@
         transition: all 300ms;
     }
 
+    .check-task{
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
     #taskDate{
         width: 6.4rem;
         margin-left: 2rem;
@@ -32,15 +38,16 @@
     }
 
     .button{
-        margin-left: 0.5rem;
         cursor: pointer;
         color: rgb(180, 174, 174); 
     }
     .edit {
+        margin-left: 1.6rem;
         color: blueviolet;
     }
 
     .delete {
+        margin-left: 1.6rem;
         color:crimson;
     }
 

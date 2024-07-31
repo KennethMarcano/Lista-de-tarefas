@@ -21,7 +21,7 @@ export default class Main extends Component {
         this.state.currentDate.setHours(0, 0, 0, 0);
         this.setState({ tarefas });
         const priorityTasks = this.getDiffTime(tarefas, this.state.currentDate);
-        setInterval(() => {        
+        setInterval(() => {
             this.showMessage(priorityTasks[0], 'Tarefas vencidas');
             this.showMessage(priorityTasks[1], 'Tarefas com limite até hoje');
         }, 3600000);
@@ -64,8 +64,8 @@ export default class Main extends Component {
                     {
                         tasks.map((task) => {
                             return <p key={task[0]}>
-                                    - {task[0]}.
-                                   </p>
+                                - {task[0]}.
+                            </p>
                         })
                     }
                 </div>
@@ -96,6 +96,9 @@ export default class Main extends Component {
 
     handleDelete = (e, index) => {
         const { tarefas } = this.state;
+        // eslint-disable-next-line
+        const deleteConfirm = confirm(`Certeza que você quer apagar a tarefa: \n ${tarefas[index][0]}`);
+        if(!deleteConfirm) return;
         let novasTarefas = [...tarefas];
         novasTarefas.splice(index, 1)
         this.setState({
