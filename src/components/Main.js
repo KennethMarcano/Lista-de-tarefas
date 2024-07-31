@@ -132,13 +132,16 @@ export default class Main extends Component {
 
     addCheck = (tarefas) => {
         const listTarefas = document.querySelectorAll('label#tarefas');
+        const tarefasCheckButton = document.querySelectorAll('#check');
         const totalTarefas = listTarefas.length;
         for (let i = 0; i < totalTarefas; i++) {
             if (tarefas[i][1]) {
-                listTarefas[i].classList.add('tarefa-check')
+                listTarefas[i].classList.add('tarefa-check');
+                tarefasCheckButton[i].classList.add('button-check');
                 continue;
             }
-            listTarefas[i].classList.remove('tarefa-check')
+            listTarefas[i].classList.remove('tarefa-check');
+            tarefasCheckButton[i].classList.remove('button-check');
         }
     }
 

@@ -5,6 +5,7 @@
     text-align: justify;
     font-size: 1.4rem;
     padding-top: 1rem;
+    overflow-y: auto;
     .listTarefas{
         display: flex;
         justify-content: space-between;
@@ -33,6 +34,7 @@
     .button{
         margin-left: 0.5rem;
         cursor: pointer;
+        color: rgb(180, 174, 174); 
     }
     .edit {
         color: blueviolet;
@@ -42,8 +44,12 @@
         color:crimson;
     }
 
-    .check{
-        color: goldenrod;
+    .tarefa-check {
+        text-decoration: line-through;
+    }
+    
+    .button-check{
+        color: rgb(20, 212, 20);
     }
 
     @media (max-width: 850px) {

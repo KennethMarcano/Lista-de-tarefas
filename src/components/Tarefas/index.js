@@ -16,7 +16,7 @@ export default function Tarefas({ tarefas, handleEdit, handleDelete, handleCheck
                             <div className="buttons">
                                 <FaEdit onClick={(e) => handleEdit(e, index)} className='edit button' />
                                 <FaWindowClose onClick={(e) => handleDelete(e, index)} className='delete button' />
-                                <FaCheckSquare onClick={(e) => handleCheck(index)} className="check button" />
+                                <FaCheckSquare onClick={(e) => handleCheck(index)} className='check button' id="check"/>
                             </div>
                         </div>
                     </li>
