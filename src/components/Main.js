@@ -20,6 +20,11 @@ export default class Main extends Component {
         if (tarefas === null) return;
         this.state.currentDate.setHours(0, 0, 0, 0);
         this.setState({ tarefas });
+        const priorityTasks = this.getDiffTime(tarefas, this.state.currentDate);
+        setInterval(() => {        
+            this.showMessage(priorityTasks[0], 'Tarefas vencidas');
+            this.showMessage(priorityTasks[1], 'Tarefas com limite até hoje');
+        }, 3600000);
     }
 
     getDiffTime = (tasks, currentDate) => {
@@ -73,9 +78,6 @@ export default class Main extends Component {
         const { tarefas, index } = this.state;
         let novaTarefa = this.state.novaTarefa;
         const date = document.getElementsByClassName('calendar');
-        const priorityTasks = this.getDiffTime(tarefas, this.state.currentDate);
-        this.showMessage(priorityTasks[0], 'Tarefas vencidas');
-        this.showMessage(priorityTasks[1], 'Tarefas com limite até hoje');
         novaTarefa[0] = novaTarefa[0].trim();
         if (!novaTarefa[0]) return;
         if (!this.state.open && date[0].value !== '') {
