@@ -47,7 +47,7 @@ export default function Main() {
                         .catch(error => {
                             console.error('error:', error);
                         });
-                    toast.error(`¡Atención! La tarea "${task[0]}" ya pasó su fecha límite.`);
+                    toast.error(`¡Atenção! Já expirou o prazo da tarefa: "${task[0]}"`);
                     setNotifiedExpired((prev) => [...prev, task[0]]);
                     return;
                 }
@@ -59,7 +59,7 @@ export default function Main() {
                         .catch(error => {
                             console.error('error:', error);
                         });
-                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de 15 minutos.`);
+                    toast.warn(`¡Atenção! Menos de 15 minutos para vencer o prazo da tarefa:"${task[0]}"`);
                     setNotifiedMin((prev) => [...prev, task[0]]);
                     return;
                 }
@@ -71,7 +71,7 @@ export default function Main() {
                         .catch(error => {
                             console.error('error:', error);
                         });
-                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de una hora.`);
+                    toast.warn(`¡Atenção! Menos de 1 hora para vencer o prazo da tarefa:"${task[0]}"`);
                     setNotifiedHour((prev) => [...prev, task[0]]);
                     return;
                 }
@@ -83,7 +83,7 @@ export default function Main() {
                         .catch(error => {
                             console.error('error:', error);
                         });
-                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de un día.`);
+                    toast.warn(`¡Atenção! Menos de 1 dia para vencer o prazo da tarefa:"${task[0]}"`);
                     setNotifiedDay((prev) => [...prev, task[0]]);
                     return;
                 }
