@@ -1,182 +1,179 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { useInterval } from 'react-use';
 
 import formatDate from '../services/formatDate';
 import Form from './Form/index'
 import Tarefas from './Tarefas';
 import './Main.css'
 
-export default class Main extends Component {
-    state = {
-        novaTarefa: ['', 0, ''],
-        tarefas: [],
-        index: -1,
-        open: true,
-        currentDate: new Date()
-    };
+export default function Main() {
+    const [newTask, setNewTask] = useState(['', 0, '']);
+    let saveTask = JSON.parse(localStorage.getItem('tasks')) || [];
+    const [tasks, setTasks] = useState(saveTask);
+    const [index, setIndex] = useState(-1);
+    const [open, setOpen] = useState(true);
+    const [notifiedDay, setNotifiedDay] = useState([]);
+    const [notifiedHour, setNotifiedHour] = useState([]);
+    const [notifiedMin, setNotifiedMin] = useState([]);
+    const [notifiedExpired, setNotifiedExpired] = useState([]);
 
-    componentDidMount() {
-        const tarefas = JSON.parse(localStorage.getItem('tarefas'));
-        if (tarefas === null) return;
-        this.state.currentDate.setHours(0, 0, 0, 0);
-        this.setState({ tarefas });
-        const priorityTasks = this.getDiffTime(tarefas, this.state.currentDate);
-        setInterval(() => {
-            this.showMessage(priorityTasks[0], 'Tarefas vencidas');
-            this.showMessage(priorityTasks[1], 'Tarefas com limite até hoje');
-        }, 3600000);
-    }
-
-    getDiffTime = (tasks, currentDate) => {
-        const overdueTaks = tasks.filter((task) => {
-            if (task[2] === '') return false;
-            const dateTask = new Date(formatDate(task[2]));
-            return dateTask.getTime() < currentDate.getTime()
-        })
-
-        const todayTasks = tasks.filter((task) => {
-            if (task[2] === '') return false;
-            const dateTask = new Date(formatDate(task[2]));
-            return dateTask.getTime() === currentDate.getTime()
-        })
-
-        return [overdueTaks, todayTasks]
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        const { tarefas } = this.state;
-        if (tarefas === prevState.tarefas) return;
-        localStorage.setItem('tarefas', JSON.stringify(tarefas));
-        this.addCheck(tarefas);
-    }
-
-    handleChange = (e) => {
-        this.setState({
-            novaTarefa: [e.target.value, false, this.state.novaTarefa[2]],
-        })
-    }
-
-    showMessage = (tasks, titleMessage) => {
-        if (tasks.length > 0) {
-            toast.warn(
-                <div>
-                    {titleMessage}:
-                    {
-                        tasks.map((task) => {
-                            return <p key={task[0]}>
-                                - {task[0]}.
-                            </p>
-                        })
-                    }
-                </div>
-            );
-        }
-    }
-
-    handleSubmit = (e) => {
-        e.preventDefault();
-        const { tarefas, index } = this.state;
-        let novaTarefa = this.state.novaTarefa;
-        const date = document.getElementsByClassName('calendar');
-        novaTarefa[0] = novaTarefa[0].trim();
-        if (!novaTarefa[0]) return;
-        if (!this.state.open && date[0].value !== '') {
-            novaTarefa[2] = date[0].value;
-        }
-        const novasTarefas = [...tarefas];
-        if (index !== -1 && novaTarefa[0]) {
-            novasTarefas[index] = novaTarefa;
-        } else novasTarefas.unshift(novaTarefa);
-        this.setState({
-            novaTarefa: ['', 0, ''],
-            tarefas: [...novasTarefas],
-            index: -1,
-        })
-    }
-
-    handleDelete = (e, index) => {
-        const { tarefas } = this.state;
+    useEffect(() => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        addCheck();
         // eslint-disable-next-line
-        const deleteConfirm = confirm(`Certeza que você quer apagar a tarefa: \n ${tarefas[index][0]}`);
-        if(!deleteConfirm) return;
-        let novasTarefas = [...tarefas];
-        novasTarefas.splice(index, 1)
-        this.setState({
-            tarefas: [...novasTarefas],
-        })
+    }, [tasks]);
+
+    useInterval(() => {
+        taskNotificationsTime();
+    }, 5000); 
+
+    const taskNotificationsTime = () => {
+        const now = new Date();
+        tasks.forEach((task, pos) => {
+            if (task[1] || task[2] === '') return;
+            const dueDate = new Date(formatDate(task[2]));
+            const timeDifference = dueDate.getTime() - now.getTime();
+            if (timeDifference < 0) {
+                if (!notifiedExpired.includes(task[0])) {
+                    toast.error(`¡Atención! La tarea "${task[0]}" ya pasó su fecha límite.`);
+                    setNotifiedExpired((prev) => [...prev, task[0]]);
+                    return;
+                }
+            }
+
+            if (timeDifference > 0 && timeDifference < 900000) {
+                if (!notifiedMin.includes(task[0])) {
+                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de 15 minutos.`);
+                    setNotifiedMin((prev) => [...prev, task[0]]);
+                    return;
+                }
+            }
+
+            if (timeDifference > 900000 && timeDifference < 3600000) {
+                if (!notifiedHour.includes(task[0])) {
+                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de una hora.`);
+                    setNotifiedHour((prev) => [...prev, task[0]]);
+                    return;
+                }
+            }
+
+            if (timeDifference > 3600000 && timeDifference < 86400000) {
+                if (!notifiedDay.includes(task[0])) {
+                    toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de un día.`);
+                    setNotifiedDay((prev) => [...prev, task[0]]);
+                    return;
+                }
+            }
+        });
     }
 
-    handleEdit = (e, index) => {
-        const { tarefas } = this.state;
-        const novasTarefas = [...tarefas]
+    const addCheck = () => {
+        const nameTasks = document.querySelectorAll('label#tarefas');
+        const checkButtonTasks = document.querySelectorAll('#check');
+        const totalTasks = nameTasks.length;
+        for (let i = 0; i < totalTasks; i++) {
+            if (tasks[i][1]) {
+                nameTasks[i].classList.add('tarefa-check');
+                checkButtonTasks[i].classList.add('button-check');
+                continue;
+            }
+            nameTasks[i].classList.remove('tarefa-check');
+            checkButtonTasks[i].classList.remove('button-check');
+        }
+    }
+
+    const handleChange = (e) => {
+        setNewTask([e.target.value, false, newTask[2]])
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const currentTasks = tasks;
+        const currentIndex = index;
+        let currentNewTask = newTask;
+        const date = document.getElementsByClassName('calendar');
+        currentNewTask[0] = currentNewTask[0].trim();
+        if (!currentNewTask[0]) return;
+        if (!open && date[0].value !== '') {
+            currentNewTask[2] = date[0].value;
+        }
+        const newTasks = [...currentTasks];
+        if (currentIndex !== -1 && currentNewTask[0]) {
+            if (notifiedDay.indexOf(newTasks[index][0]) !== -1) {
+                setNotifiedDay((prev) => prev.filter(item => item !== newTasks[index][0]));
+            }
+            if (notifiedHour.indexOf(newTasks[index][0]) !== -1) {
+                setNotifiedHour((prev) => prev.filter(item => item !== newTasks[index][0]));
+            }
+            if (notifiedMin.indexOf(newTasks[index][0]) !== -1) {
+                setNotifiedMin((prev) => prev.filter(item => item !== newTasks[index][0]));
+            }
+            if (notifiedExpired.indexOf(newTasks[index][0]) !== -1) {
+                setNotifiedExpired((prev) => prev.filter(item => item !== newTasks[index][0]));
+            }
+
+            newTasks[index] = currentNewTask;
+        } else newTasks.unshift(currentNewTask);
+        setNewTask(['', 0, '']);
+        setTasks(newTasks);
+        setIndex(-1);
+    }
+
+    const handleDelete = (pos) => {
+        const currentTasks = tasks;
+        // eslint-disable-next-line
+        const deleteConfirm = confirm(`Certeza que você quer apagar a tarefa: \n ${currentTasks[pos][0]}`);
+        if (!deleteConfirm) return;
+        const newTasks = [...currentTasks];
+        newTasks.splice(pos, 1);
+        setTasks(newTasks);
+    }
+
+    const handleEdit = (pos) => {
+        const currentTasks = tasks;
+        const newTasks = [...currentTasks];
         const calendar = document.getElementsByClassName('calendar');
-        if (novasTarefas[index][2] !== '') {
+        if (newTasks[pos][2] !== '') {
             calendar[0].style.display = 'block';
-            this.setState({ open: false });
+            setOpen(false);
         }
         else {
             calendar[0].style.display = 'none';
-            this.setState({ open: true });
+            setOpen(true);
         }
-        this.setState({
-            novaTarefa: novasTarefas[index],
-            index,
-        })
+        setNewTask(newTasks[pos])
+        setIndex(pos)
     }
 
-    handleCheck = (index) => {
-        const { tarefas } = this.state;
-        let novasTarefas = [...tarefas];
-        novasTarefas[index][1] = !novasTarefas[index][1];
-        this.setState({
-            tarefas: [...novasTarefas],
-        })
+    const handleCheck = (pos) => {
+        const newTasks = [...tasks];
+        newTasks[pos][1] = !newTasks[pos][1];
+        setTasks(newTasks);
     }
 
-    addCheck = (tarefas) => {
-        const listTarefas = document.querySelectorAll('label#tarefas');
-        const tarefasCheckButton = document.querySelectorAll('#check');
-        const totalTarefas = listTarefas.length;
-        for (let i = 0; i < totalTarefas; i++) {
-            if (tarefas[i][1]) {
-                listTarefas[i].classList.add('tarefa-check');
-                tarefasCheckButton[i].classList.add('button-check');
-                continue;
-            }
-            listTarefas[i].classList.remove('tarefa-check');
-            tarefasCheckButton[i].classList.remove('button-check');
-        }
-    }
-
-    handleOpenCalendar = () => {
+    const handleOpenCalendar = () => {
         const calendar = document.getElementsByClassName('calendar');
-        if (this.state.open) calendar[0].style.display = 'block';
+        if (open) calendar[0].style.display = 'flex';
         else calendar[0].style.display = 'none';
-        this.setState({
-            open: !this.state.open,
-        })
+        setOpen(!open)
     }
 
-    render() {
-        const { novaTarefa, tarefas } = this.state;
-        return (
-            <div className='main'>
-                <h1>Lista de tarefas</h1>
-                <Form
-                    handleSubmit={this.handleSubmit}
-                    handleChange={this.handleChange}
-                    novaTarefa={novaTarefa}
-                    getDate={this.getDate}
-                    handleOpenCalendar={this.handleOpenCalendar}
-                />
-                <Tarefas
-                    tarefas={tarefas}
-                    handleEdit={this.handleEdit}
-                    handleDelete={this.handleDelete}
-                    handleCheck={this.handleCheck}
-                    addCheck={this.addCheck}
-                />
-            </div>
-        )
-    }
+    return (
+        <div className='main'>
+            <h1>Lista de tarefas</h1>
+            <Form
+                handleSubmit={handleSubmit}
+                handleChange={handleChange}
+                novaTarefa={newTask}
+                handleOpenCalendar={handleOpenCalendar}
+            />
+            <Tarefas
+                tarefas={tasks}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                handleCheck={handleCheck}
+            />
+        </div>
+    )
 }

@@ -16,8 +16,7 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
             setStartDate(new Date());
             return;
         }
-        const novodate = formatDate(novaTarefa[2]);
-        setStartDate(new Date(novodate));
+        setStartDate(formatDate(novaTarefa[2]));
     }, [novaTarefa])
 
     const handleDateChange = (date) => {
@@ -41,7 +40,12 @@ export default function Form({ handleSubmit, handleChange, novaTarefa, handleOpe
                 selected={startDate}
                 onSelect={handleDateChange}
                 onChange={handleDateChange}
-                dateFormat={"dd-MM-yy"}
+                dateFormat="dd/MM/yyyy HH:mm"
+                popperPlacement="right-end"
+                peekNextMonth
+                showMonthDropdown
+                dropdownMode="select"
+                showTimeInput
                 className='calendar'
             />
             <button type='submit'>

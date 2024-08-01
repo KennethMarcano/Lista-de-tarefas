@@ -1,14 +1,7 @@
-export default function formatDate(date) {
-    const dates = date.split('-');
-    dates.reverse();
-    if (dates[1].lenght < 2) {
-        dates[1] = dates[1].padStart(2, '0')
-    }
-
-    if (dates[2].lenght < 2) {
-        dates[2] = dates[2].toString().padStart(2, '0');
-    }
-    dates[2] = dates[2] + 'T00:00:00';
-    dates[0] = '20' + dates[0];
-    return dates.join('-');
+export default function formatDate(dateString) {
+    const date = dateString.slice(0, 10).split('/');
+    const hour = dateString.slice(11).split(':');
+    date.reverse();
+    date[1] = (parseInt(date[1]) - 1).toString();
+    return new Date(date[0], date[1], date[2], hour[0], hour[1]);
 }
