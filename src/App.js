@@ -8,7 +8,9 @@ import './App.css';
 function App() {
   return <>
     <Main />
-    <ToastContainer />  
+    <ToastContainer
+    autoClose={false}
+    />  
   </>
 }
 
