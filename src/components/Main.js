@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useInterval } from 'react-use';
+import { FaExclamationCircle } from 'react-icons/fa';
 
 import formatDate from '../services/formatDate';
-import Form from './Form/index'
+import Form from './Form/index';
 import Tarefas from './Tarefas';
+import AuthNotifications from './AuthNotifications';
 import './Main.css'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+
+const son = require('../sounds/sound_alert.mp3')
+const playAlert = new Audio(son);
 
 export default function Main() {
     const [newTask, setNewTask] = useState(['', 0, '']);
@@ -17,6 +23,7 @@ export default function Main() {
     const [notifiedHour, setNotifiedHour] = useState([]);
     const [notifiedMin, setNotifiedMin] = useState([]);
     const [notifiedExpired, setNotifiedExpired] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     useEffect(() => {
         localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -25,8 +32,8 @@ export default function Main() {
     }, [tasks]);
 
     useInterval(() => {
-        taskNotificationsTime();
-    }, 5000); 
+        (showNotifications && taskNotificationsTime());
+    }, showNotifications ? 5000 : null);
 
     const taskNotificationsTime = () => {
         const now = new Date();
@@ -36,6 +43,10 @@ export default function Main() {
             const timeDifference = dueDate.getTime() - now.getTime();
             if (timeDifference < 0) {
                 if (!notifiedExpired.includes(task[0])) {
+                    playAlert.play()
+                        .catch(error => {
+                            console.error('error:', error);
+                        });
                     toast.error(`¡Atención! La tarea "${task[0]}" ya pasó su fecha límite.`);
                     setNotifiedExpired((prev) => [...prev, task[0]]);
                     return;
@@ -44,6 +55,10 @@ export default function Main() {
 
             if (timeDifference > 0 && timeDifference < 900000) {
                 if (!notifiedMin.includes(task[0])) {
+                    playAlert.play()
+                        .catch(error => {
+                            console.error('error:', error);
+                        });
                     toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de 15 minutos.`);
                     setNotifiedMin((prev) => [...prev, task[0]]);
                     return;
@@ -52,6 +67,10 @@ export default function Main() {
 
             if (timeDifference > 900000 && timeDifference < 3600000) {
                 if (!notifiedHour.includes(task[0])) {
+                    playAlert.play()
+                        .catch(error => {
+                            console.error('error:', error);
+                        });
                     toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de una hora.`);
                     setNotifiedHour((prev) => [...prev, task[0]]);
                     return;
@@ -60,6 +79,10 @@ export default function Main() {
 
             if (timeDifference > 3600000 && timeDifference < 86400000) {
                 if (!notifiedDay.includes(task[0])) {
+                    playAlert.play()
+                        .catch(error => {
+                            console.error('error:', error);
+                        });
                     toast.warn(`¡Atención! La tarea "${task[0]}" tiene una fecha límite en menos de un día.`);
                     setNotifiedDay((prev) => [...prev, task[0]]);
                     return;
@@ -87,6 +110,28 @@ export default function Main() {
         setNewTask([e.target.value, false, newTask[2]])
     }
 
+    const resetNotifications = (newTasks, pos = -1) => {
+        if(pos === -1) {
+            setNotifiedDay([])
+            setNotifiedHour([])
+            setNotifiedMin([])
+            setNotifiedExpired([])
+            return;
+        }
+        if (notifiedDay.indexOf(newTasks[pos][0]) !== -1) {
+            setNotifiedDay((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        }
+        if (notifiedHour.indexOf(newTasks[pos][0]) !== -1) {
+            setNotifiedHour((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        }
+        if (notifiedMin.indexOf(newTasks[pos][0]) !== -1) {
+            setNotifiedMin((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        }
+        if (notifiedExpired.indexOf(newTasks[pos][0]) !== -1) {
+            setNotifiedExpired((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const currentTasks = tasks;
@@ -100,19 +145,7 @@ export default function Main() {
         }
         const newTasks = [...currentTasks];
         if (currentIndex !== -1 && currentNewTask[0]) {
-            if (notifiedDay.indexOf(newTasks[index][0]) !== -1) {
-                setNotifiedDay((prev) => prev.filter(item => item !== newTasks[index][0]));
-            }
-            if (notifiedHour.indexOf(newTasks[index][0]) !== -1) {
-                setNotifiedHour((prev) => prev.filter(item => item !== newTasks[index][0]));
-            }
-            if (notifiedMin.indexOf(newTasks[index][0]) !== -1) {
-                setNotifiedMin((prev) => prev.filter(item => item !== newTasks[index][0]));
-            }
-            if (notifiedExpired.indexOf(newTasks[index][0]) !== -1) {
-                setNotifiedExpired((prev) => prev.filter(item => item !== newTasks[index][0]));
-            }
-
+            resetNotifications(newTasks, currentIndex)
             newTasks[index] = currentNewTask;
         } else newTasks.unshift(currentNewTask);
         setNewTask(['', 0, '']);
@@ -159,9 +192,29 @@ export default function Main() {
         setOpen(!open)
     }
 
+    const handleShowNotifications = (show) => {
+        if (!show) {
+            setShowNotifications(show);
+            return;
+        }
+        const currentTasks = tasks;
+        const newTasks = [...currentTasks];
+        resetNotifications(newTasks)
+        setShowNotifications(show);
+    }
+
     return (
         <div className='main'>
-            <h1>Lista de tarefas</h1>
+            <div className='title-auth'>
+                <h1>Lista de tarefas</h1>
+                <div className="dropdown">
+                    <FaExclamationCircle/>
+                    <AuthNotifications
+                        handleShowNotifications={handleShowNotifications}
+                    />
+                </div>
+            </div>
+
             <Form
                 handleSubmit={handleSubmit}
                 handleChange={handleChange}

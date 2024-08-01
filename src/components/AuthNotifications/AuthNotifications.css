@@ -1,0 +1,28 @@
+.div {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 16rem;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 1rem 1rem;
+    border-radius: 0.5rem;
+    z-index: 1;
+
+    div {
+        display: flex;
+        justify-content: space-around;
+        padding-top: 1rem;
+    }
+
+    .button {
+        cursor: pointer;
+    }
+
+    .noauth {
+        color: red;
+    }
+
+    .auth {
+        color: green;
+    }
+}

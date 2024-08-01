@@ -79,7 +79,9 @@
 
         .date-buttons{
             display: flex;
-            align-self: center;
+            div{
+                align-self: center;
+            }
         }
     }
 }
