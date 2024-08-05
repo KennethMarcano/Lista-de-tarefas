@@ -7,22 +7,29 @@ import formatDate from '../services/formatDate';
 import Form from './Form/index';
 import Tarefas from './Tarefas';
 import AuthNotifications from './AuthNotifications';
-import './Main.css'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+import './Main.css';
 
-const son = require('../sounds/sound_alert.mp3')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const son = require('../sounds/sound_alert.mp3');
 const playAlert = new Audio(son);
+const NOTIFICATION_TIMING_IN_MILLISECONDS = {
+    ONE_MINUTE: 60000,
+    FIFTEEN_MINUTES: 900000,
+    ONE_HOUR: 3600000,
+    ONE_DAY: 86400000,
+};
 
 export default function Main() {
-    const [newTask, setNewTask] = useState(['', 0, '']);
-    let saveTask = JSON.parse(localStorage.getItem('tasks')) || [];
-    const [tasks, setTasks] = useState(saveTask);
+    const [newTask, setNewTask] = useState(['', false, '']);
+    const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasks')) || []);
     const [index, setIndex] = useState(-1);
     const [open, setOpen] = useState(true);
-    const [notifiedDay, setNotifiedDay] = useState([]);
-    const [notifiedHour, setNotifiedHour] = useState([]);
-    const [notifiedMin, setNotifiedMin] = useState([]);
-    const [notifiedExpired, setNotifiedExpired] = useState([]);
+    const [notifications, setNotifications] = useState({
+        day: [],
+        hour: [],
+        min: [],
+        expired: [],
+    });
     const [showNotifications, setShowNotifications] = useState(false);
 
     useEffect(() => {
@@ -33,7 +40,32 @@ export default function Main() {
 
     useInterval(() => {
         (showNotifications && taskNotificationsTime());
-    }, showNotifications ? 5000 : null);
+    }, showNotifications ? 1000 : null);
+
+    const checkNotification = (typeNotification, task, message, typeMessage) => {
+        if (!notifications[typeNotification].includes(task)) {
+            playAlert.play()
+                .catch(error => {
+                    console.error('error:', error);
+                });
+            switch (typeMessage) {
+                case 'error':
+                    toast.error(`${message}: "${task}"`);
+                    break;
+                case 'warn':
+                    toast.warn(`${message}: "${task}"`);
+                    break;
+                default:
+                    toast(`${message}: "${task}"`);
+            }
+
+            setNotifications(prevNotifications => ({
+                ...prevNotifications,
+                [typeNotification]: [...prevNotifications[typeNotification], task]
+            }));
+        }
+
+    }
 
     const taskNotificationsTime = () => {
         const now = new Date();
@@ -42,51 +74,23 @@ export default function Main() {
             const dueDate = new Date(formatDate(task[2]));
             const timeDifference = dueDate.getTime() - now.getTime();
             if (timeDifference < 0) {
-                if (!notifiedExpired.includes(task[0])) {
-                    playAlert.play()
-                        .catch(error => {
-                            console.error('error:', error);
-                        });
-                    toast.error(`¡Atenção! Já expirou o prazo da tarefa: "${task[0]}"`);
-                    setNotifiedExpired((prev) => [...prev, task[0]]);
-                    return;
-                }
+                checkNotification(timeDifference, 'expired', task[0], '¡Atenção! Já expirou o prazo da tarefa', 'error');
+                return;
             }
 
-            if (timeDifference > 0 && timeDifference < 900000) {
-                if (!notifiedMin.includes(task[0])) {
-                    playAlert.play()
-                        .catch(error => {
-                            console.error('error:', error);
-                        });
-                    toast.warn(`¡Atenção! Menos de 15 minutos para vencer o prazo da tarefa:"${task[0]}"`);
-                    setNotifiedMin((prev) => [...prev, task[0]]);
-                    return;
-                }
+            if (timeDifference > 0 && timeDifference < NOTIFICATION_TIMING_IN_MILLISECONDS.FIFTEEN_MINUTES) {
+                checkNotification(timeDifference, 'min', task[0], '¡Atenção! Menos de 15 minutos para vencer o prazo da tarefa', 'warn');
+                return;
             }
 
-            if (timeDifference > 900000 && timeDifference < 3600000) {
-                if (!notifiedHour.includes(task[0])) {
-                    playAlert.play()
-                        .catch(error => {
-                            console.error('error:', error);
-                        });
-                    toast.warn(`¡Atenção! Menos de 1 hora para vencer o prazo da tarefa:"${task[0]}"`);
-                    setNotifiedHour((prev) => [...prev, task[0]]);
-                    return;
-                }
+            if (timeDifference > NOTIFICATION_TIMING_IN_MILLISECONDS.FIFTEEN_MINUTES && timeDifference < NOTIFICATION_TIMING_IN_MILLISECONDS.ONE_HOUR) {
+                checkNotification(timeDifference, 'hour', task[0], '¡Atenção! Menos de 1 hora para vencer o prazo da tarefa', 'warn');
+                return;
             }
 
-            if (timeDifference > 3600000 && timeDifference < 86400000) {
-                if (!notifiedDay.includes(task[0])) {
-                    playAlert.play()
-                        .catch(error => {
-                            console.error('error:', error);
-                        });
-                    toast.warn(`¡Atenção! Menos de 1 dia para vencer o prazo da tarefa:"${task[0]}"`);
-                    setNotifiedDay((prev) => [...prev, task[0]]);
-                    return;
-                }
+            if (timeDifference > NOTIFICATION_TIMING_IN_MILLISECONDS.ONE_HOUR && timeDifference < NOTIFICATION_TIMING_IN_MILLISECONDS.ONE_DAY) {
+                checkNotification(timeDifference, 'day', task[0], '¡Atenção! Menos de 1 dia para vencer o prazo da tarefa', 'warn');
+                return;
             }
         });
     }
@@ -110,48 +114,63 @@ export default function Main() {
         setNewTask([e.target.value, false, newTask[2]])
     }
 
-    const resetNotifications = (newTasks, pos = -1) => {
-        if(pos === -1) {
-            setNotifiedDay([])
-            setNotifiedHour([])
-            setNotifiedMin([])
-            setNotifiedExpired([])
+    const resetNotifications = (newTasks) => {
+        if (index === -1) {
+            setNotifications({
+                day: [],
+                hour: [],
+                min: [],
+                expired: []
+            });
             return;
         }
-        if (notifiedDay.indexOf(newTasks[pos][0]) !== -1) {
-            setNotifiedDay((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        if (notifications.day.indexOf(newTasks[index][0]) !== -1) {
+            setNotifications(prevNotifications => ({
+                ...prevNotifications,
+                day: [...prevNotifications.day.filter(item => item !== newTasks[index][0])]
+            }));
         }
-        if (notifiedHour.indexOf(newTasks[pos][0]) !== -1) {
-            setNotifiedHour((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        if (notifications.hour.indexOf(newTasks[index][0]) !== -1) {
+            setNotifications(prevNotifications => ({
+                ...prevNotifications,
+                hour: [...prevNotifications.hour.filter(item => item !== newTasks[index][0])]
+            }));
         }
-        if (notifiedMin.indexOf(newTasks[pos][0]) !== -1) {
-            setNotifiedMin((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        if (notifications.min.indexOf(newTasks[index][0]) !== -1) {
+            setNotifications(prevNotifications => ({
+                ...prevNotifications,
+                min: [...prevNotifications.min.filter(item => item !== newTasks[index][0])]
+            }));
         }
-        if (notifiedExpired.indexOf(newTasks[pos][0]) !== -1) {
-            setNotifiedExpired((prev) => prev.filter(item => item !== newTasks[pos][0]));
+        if (notifications.expired.indexOf(newTasks[index][0]) !== -1) {
+            setNotifications(prevNotifications => ({
+                ...prevNotifications,
+                expired: [...prevNotifications.expired.filter(item => item !== newTasks[index][0])]
+            }));
         }
     }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const currentTasks = tasks;
-        const currentIndex = index;
-        let currentNewTask = newTask;
-        const date = document.getElementsByClassName('calendar');
-        currentNewTask[0] = currentNewTask[0].trim();
-        if (!currentNewTask[0]) return;
-        if (!open && date[0].value !== '') {
-            currentNewTask[2] = date[0].value;
+        const trimmedTask = newTask[0].trim();
+        if (!trimmedTask) return;
+
+        const currentTasks = [...tasks];
+        const date = document.getElementsByClassName('calendar')[0]?.value;
+
+        const updatedTask = [trimmedTask, false, open ? '' : date];
+
+        if (index !== -1) {
+            resetNotifications(currentTasks);
+            currentTasks[index] = updatedTask;
+        } else {
+            currentTasks.unshift(updatedTask);
         }
-        const newTasks = [...currentTasks];
-        if (currentIndex !== -1 && currentNewTask[0]) {
-            resetNotifications(newTasks, currentIndex)
-            newTasks[index] = currentNewTask;
-        } else newTasks.unshift(currentNewTask);
-        setNewTask(['', 0, '']);
-        setTasks(newTasks);
+
+        setTasks(currentTasks);
+        setNewTask(['', false, '']);
         setIndex(-1);
-    }
+    };
 
     const handleDelete = (pos) => {
         const currentTasks = tasks;
@@ -201,6 +220,7 @@ export default function Main() {
         const newTasks = [...currentTasks];
         resetNotifications(newTasks)
         setShowNotifications(show);
+        taskNotificationsTime()
     }
 
     return (
@@ -208,7 +228,7 @@ export default function Main() {
             <div className='title-auth'>
                 <h1>Lista de tarefas</h1>
                 <div className="dropdown">
-                    <FaExclamationCircle/>
+                    <FaExclamationCircle />
                     <AuthNotifications
                         handleShowNotifications={handleShowNotifications}
                     />
