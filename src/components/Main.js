@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useInterval } from 'react-use';
 import { FaExclamationCircle } from 'react-icons/fa';
 
 import { useTaskNotification } from '../hooks/useTaskNotification';
+import { useTask } from '../hooks/useTask';
 import Form from './Form/index';
 import Tarefas from './Tarefas';
 import AuthNotifications from './AuthNotifications';
@@ -17,12 +18,8 @@ const NOTIFICATION_TIMING_IN_MILLISECONDS = {
 };
 
 export default function Main() {
-    const [newTask, setNewTask] = useState(['', false, '']);
-    const [tasks, setTasks] = useState(JSON.parse(localStorage.getItem('tasks')) || []);
-    const [index, setIndex] = useState(-1);
-    const [open, setOpen] = useState(true);
     const { taskNotificationsTime, resetNotifications, showNotifications, updateShowNotifications } = useTaskNotification();
-
+    const { newTask, tasks, addCheck, updateTaskCurrent, addTask, deleteTask, editTask, checkTask, openCloseCalendar } = useTask();
 
     useEffect(() => {
         localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -33,86 +30,6 @@ export default function Main() {
     useInterval(() => {
         (showNotifications && taskNotificationsTime(tasks, NOTIFICATION_TIMING_IN_MILLISECONDS));
     }, showNotifications ? 1000 : null);
-
-    const addCheck = () => {
-        const nameTasks = document.querySelectorAll('label#tarefas');
-        const checkButtonTasks = document.querySelectorAll('#check');
-        const totalTasks = nameTasks.length;
-        for (let i = 0; i < totalTasks; i++) {
-            if (tasks[i][1]) {
-                nameTasks[i].classList.add('tarefa-check');
-                checkButtonTasks[i].classList.add('button-check');
-                continue;
-            }
-            nameTasks[i].classList.remove('tarefa-check');
-            checkButtonTasks[i].classList.remove('button-check');
-        }
-    }
-
-    const handleChange = (e) => {
-        setNewTask([e.target.value, false, newTask[2]])
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const trimmedTask = newTask[0].trim();
-        if (!trimmedTask) return;
-
-        const currentTasks = [...tasks];
-        const date = document.getElementsByClassName('calendar')[0]?.value;
-
-        const updatedTask = [trimmedTask, false, open ? '' : date];
-
-        if (index !== -1) {
-            resetNotifications(currentTasks, index);
-            currentTasks[index] = updatedTask;
-        } else {
-            currentTasks.unshift(updatedTask);
-        }
-
-        setTasks(currentTasks);
-        setNewTask(['', false, '']);
-        setIndex(-1);
-    };
-
-    const handleDelete = (pos) => {
-        const currentTasks = tasks;
-        // eslint-disable-next-line
-        const deleteConfirm = confirm(`Certeza que você quer apagar a tarefa: \n ${currentTasks[pos][0]}`);
-        if (!deleteConfirm) return;
-        const newTasks = [...currentTasks];
-        newTasks.splice(pos, 1);
-        setTasks(newTasks);
-    }
-
-    const handleEdit = (pos) => {
-        const currentTasks = tasks;
-        const newTasks = [...currentTasks];
-        const calendar = document.getElementsByClassName('calendar');
-        if (newTasks[pos][2] !== '') {
-            calendar[0].style.display = 'block';
-            setOpen(false);
-        }
-        else {
-            calendar[0].style.display = 'none';
-            setOpen(true);
-        }
-        setNewTask(newTasks[pos])
-        setIndex(pos)
-    }
-
-    const handleCheck = (pos) => {
-        const newTasks = [...tasks];
-        newTasks[pos][1] = !newTasks[pos][1];
-        setTasks(newTasks);
-    }
-
-    const handleOpenCalendar = () => {
-        const calendar = document.getElementsByClassName('calendar');
-        if (open) calendar[0].style.display = 'flex';
-        else calendar[0].style.display = 'none';
-        setOpen(!open)
-    }
 
     return (
         <div className='main'>
@@ -127,16 +44,16 @@ export default function Main() {
             </div>
 
             <Form
-                handleSubmit={handleSubmit}
-                handleChange={handleChange}
+                handleSubmit={(e) => addTask(e, resetNotifications)}
+                handleChange={updateTaskCurrent}
                 novaTarefa={newTask}
-                handleOpenCalendar={handleOpenCalendar}
+                handleOpenCalendar={openCloseCalendar}
             />
             <Tarefas
                 tarefas={tasks}
-                handleEdit={handleEdit}
-                handleDelete={handleDelete}
-                handleCheck={handleCheck}
+                handleEdit={(index) => editTask(index)}
+                handleDelete={(index) => deleteTask(index)}
+                handleCheck={(index) => checkTask(index)}
             />
         </div>
     )
