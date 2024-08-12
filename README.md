@@ -1,3 +1,19 @@
+<details>
+
+<summary>Tips for collapsed sections</summary>
+
+# ABOUT THE APP
+
+You can add text within a collapsed section. 
+
+You can add an image or a code block, too.
+
+```ruby
+   puts "Hello World"
+```
+
+</details>
+
 # ABOUT THE APP
 
 Web application for a task list, it is possible to add a new task and optionally set a deadline to complete the task, you can also modify the task and the date of the task or delete it.
