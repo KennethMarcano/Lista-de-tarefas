@@ -2,19 +2,14 @@
 
 <summary>Tips for collapsed sections</summary>
 
-# ABOUT THE APP
-
-You can add text within a collapsed section. 
-
-You can add an image or a code block, too.
-
-```ruby
-   puts "Hello World"
-```
+## ABOUT THE APP
+- George Washington
+- John Adams
+- Thomas Jefferson
 
 </details>
 
-# ABOUT THE APP
+## ABOUT THE APP
 
 Web application for a task list, it is possible to add a new task and optionally set a deadline to complete the task, you can also modify the task and the date of the task or delete it.
 
@@ -22,7 +17,7 @@ It is also possible to enable notifications for the remaining time to complete t
 
 The task list is saved in the browser's local storage, so if you close or refresh the page, the task list that was previously there will be loaded.
 
-# TECH
+## TECH
 
 This application was developed with JavaScript and React, using functional components and custom hooks.
 
