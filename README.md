@@ -29,4 +29,4 @@ Open the app in your browser (http://localhost:3000)
 
 ## Contributing
 
-Any contributions you make are greatly appreciated. If you have a suggestion that would make this better, please fork the repo and create a Pull Request. You can also simply open an issue.
+Any contributions you make are greatly appreciated. If you have a suggestion that would make this better, please fork the repo and create a Pull Request.
